@@ -13,19 +13,12 @@ samp = """3   4
 
 
 def solve_a(text):
-    lines = text.splitlines()
-    left = []
-    right = []
-    for line in lines:
-        l, r = line.split()
-        left.append(int(l))
-        right.append(int(r))
+    left, right = map(
+        list, zip(*(map(int, line.split()) for line in text.splitlines()))
+    )
     left.sort()
     right.sort()
-    combined = []
-    for i, v in enumerate(left):
-        combined.append({"left": v, "right": right[i], "distance": abs(v - right[i])})
-    return sum(o["distance"] for o in combined)
+    return sum(abs(l - r) for l, r in zip(left, right))
 
 
 print(f"sample a: {solve_a(samp)}")
@@ -33,22 +26,10 @@ print(f"answer a: {solve_a(data)}\n")
 
 
 def solve_b(text):
-    lines = text.splitlines()
-    left = []
-    right = []
-    for line in lines:
-        l, r = line.split()
-        left.append(int(l))
-        right.append(int(r))
+    left, right = zip(*(map(int, line.split()) for line in text.splitlines()))
     lc = Counter(left)
     rc = Counter(right)
-    sum_distance = 0
-    for o in lc:
-        l = lc[o]
-        r = rc[o]
-        for i in range(l):
-            sum_distance += o * r
-    return sum_distance
+    return sum(num * lc[num] * rc[num] for num in lc)
 
 
 print(f"sample b: {solve_b(samp)}")
