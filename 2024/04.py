@@ -98,8 +98,86 @@ print(f"sample a: {solve_a(samp)}")
 print(f"answer a: {solve_a(data)}\n")
 
 
-def solve_b(text):
-    return 0
+def get_diagonal(lines, row, col, right):
+    chars = []
+    while row < len(lines) and 0 <= col < len(lines[0]):
+        chars.append(lines[row][col])
+        row += 1
+        col += 1 if right else -1
+    return "".join(chars)
+
+
+def find_matches(string, pos, label):
+    matches = []
+    for match in re.finditer(pattern=r"MAS", string=string):
+        matches.append(
+            {
+                "dir": label,
+                "string": string,
+                "start_pos": pos,
+                "found": match.group(),
+                "found_at": match.start(),
+            }
+        )
+    for match in re.finditer(pattern=r"SAM", string=string):
+        matches.append(
+            {
+                "dir": label,
+                "string": string,
+                "start_pos": pos,
+                "found": match.group(),
+                "found_at": match.start(),
+            }
+        )
+    return matches
+
+
+def solve_b(lines):
+    matches = []
+    line_width = len(lines[0])
+    # diagonal right across top row
+    for col in range(len(lines[0])):
+        dr = get_diagonal(lines, 0, col, right=True)
+        matches.extend(find_matches(dr, (0, col), "DR"))
+
+    # diagonal right down left column
+    for row in range(1, len(lines)):
+        dr = get_diagonal(lines, row, 0, right=True)
+        matches.extend(find_matches(dr, (row, 0), "DR"))
+
+    # diagonal left across top row
+    for col in range(line_width):
+        dl = get_diagonal(lines, 0, col, right=False)
+        matches.extend(find_matches(dl, (0, col), "DL"))
+
+    # diagonal left down left column
+    for row in range(1, len(lines)):
+        dl = get_diagonal(lines, row, line_width - 1, right=False)
+        matches.extend(find_matches(dl, (row, line_width - 1), "DL"))
+
+    for i, o in enumerate(matches):
+        if o["dir"] == "DR":
+            matches[i]["A_at"] = (
+                o["start_pos"][0] + o["found_at"] + 1,
+                o["start_pos"][1] + o["found_at"] + 1,
+            )
+        if o["dir"] == "DL":
+            matches[i]["A_at"] = (
+                o["start_pos"][0] + o["found_at"] + 1,
+                o["start_pos"][1] - o["found_at"] - 1,
+            )
+
+    matches_count = {}
+    for o in matches:
+        key = o["A_at"]
+        count = 1
+        if key in matches_count:
+            count = matches_count[key] + 1
+        matches_count[key] = count
+
+    overlap = {key: value for key, value in matches_count.items() if value == 2}
+
+    return len(overlap)
 
 
 print(f"sample b: {solve_b(samp)}")
