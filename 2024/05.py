@@ -67,3 +67,30 @@ def solve_a(inputs):
 
 print(f"sample a: {solve_a(samp)}")
 print(f"answer a: {solve_a(data)}\n")
+
+
+def solve_b(inputs):
+    orders, updates = inputs.split(sep="\n\n")
+    orders = orders.splitlines()
+    updates = updates.splitlines()
+
+    G = nx.DiGraph()
+
+    for o in orders:
+        x, y = o.split(sep="|")
+        G.add_edge(int(x), int(y))
+
+    incorrect_middle_sum = 0
+    for u in updates:
+        page_nums = u.split(sep=",")
+        page_nums = [int(o) for o in page_nums]
+        sg = G.subgraph(page_nums)
+        if not is_valid_order(sg, page_nums):
+            ordered = list(nx.topological_sort(sg))
+            incorrect_middle_sum += ordered[len(ordered) // 2]
+
+    return incorrect_middle_sum
+
+
+print(f"sample b: {solve_b(samp)}")
+print(f"answer b: {solve_b(data)}")
